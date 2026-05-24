@@ -3,8 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DokterController;
+use App\Http\Controllers\Api\RuanganController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
 Route::apiResource('dokter', DokterController::class);
+Route::apiResource('/ruangans', RuanganController::class);
