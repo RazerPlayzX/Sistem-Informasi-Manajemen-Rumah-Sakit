@@ -3,27 +3,20 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Import Controller dari Modul Pasien
+// Import semua Controller API/Resource Kelompok
 use App\Http\Controllers\PasienController;
-use App\Http\Controllers\PasienApiController;
+use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\ObatController;
+use App\Http\Controllers\DokterController;
+use App\Http\Controllers\RuanganController;
 
-// Import Controller dari Modul Obat, Dokter, Ruangan, dan Transaksi
-use App\Http\Controllers\Api\DokterController;
-use App\Http\Controllers\Api\RuanganController;
-use App\Http\Controllers\Api\TransaksiController;
-
-// Rute Bawaan Sanctum
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// --- DAFTAR RUTE API SIMRS KELOMPOK ---
-
-// Rute Modul Pasien
+// --- ENDPOINT DATA CRUD KELOMPOK (Ditembak lewat AJAX) ---
 Route::apiResource('pasien', PasienController::class);
-
-// Rute Modul Transaksi, Obat, Dokter, dan Ruangan
 Route::apiResource('transaksi', TransaksiController::class);
 Route::apiResource('obats', ObatController::class);
 Route::apiResource('dokter', DokterController::class);
-Route::apiResource('ruangans', RuanganController::class); // Tanda '/' di depan sudah dihapus agar standar
+Route::apiResource('ruangans', RuanganController::class);

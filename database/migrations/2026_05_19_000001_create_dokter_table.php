@@ -22,6 +22,7 @@ return new class extends Migration
         ]);
         $table->string('no_telp', 15);
         $table->string('email')->unique();
+        $table->string('password'); // <-- Tambahkan ini untuk fitur login dokter
         $table->enum('status', ['Aktif', 'Tidak Aktif'])->default('Aktif');
         $table->timestamps();
     });

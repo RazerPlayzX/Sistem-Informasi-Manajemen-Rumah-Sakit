@@ -2,21 +2,42 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PasienController;
+use App\Http\Controllers\AuthController;
+use App\Models\Pasien;
+use App\Models\Dokter;
+use App\Models\Obat;
+use App\Models\Transaksi;
 
-// Rute Halaman Utama (Menampilkan Modul Obat Krisna)
-Route::get('/', function () {
-    return view('obat');
-});
+// --- SISTEM OTENTIKASI DOKTER ---
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Rute Modul Transaksi
-Route::get('/transaksi', function () {
-    return view('transaksi');
-});
+// --- ZONE PROTEKSI (Wajib Login untuk Masuk Halaman SIMRS) ---
+Route::middleware(['auth'])->group(function () {
+    
+    // 1. Dashboard Utama (Tampilan Statistik)
+    Route::get('/', function () {
+        $stats = [
+            'pasien' => Pasien::count(),
+            'dokter' => Dokter::count(),
+            'obat' => Obat::count(),
+            'transaksi' => Transaksi::where('status_pembayaran', 'Lunas')->sum('total_bayar')
+        ];
+        return view('dashboard', compact('stats'));
+    })->name('dashboard');
 
-// Rute Modul Pasien (Menggunakan Controller agar Data Ter-render)
-Route::get('/pasien', [PasienController::class, 'index']);
-Route::get('/pasien/create', function () {
-    return view('pasien.create'); 
+    // 2. Modul Tampilan HTML Pasien (Hanya render View, proses CRUD via API)
+    Route::get('/pasien', function () { return view('pasien'); })->name('pasien.index');
+    // 3. Modul Tampilan HTML Obat (Krisna)
+    Route::get('/obat', function () { return view('obat'); })->name('obat.index');
+
+    // 4. Modul Tampilan HTML Transaksi
+    Route::get('/transaksi', function () { return view('transaksi'); })->name('transaksi.index');
+
+    // 5. Modul Tampilan HTML Ruangan
+    Route::get('/ruangan', function () { return view('ruangan'); })->name('ruangan.index');
+
+    // 6. Modul Tampilan HTML Dokter
+    Route::get('/dokter', function () { return view('dokter'); })->name('dokter.index');
 });
-Route::get('/pasien/{id}', [PasienController::class, 'show']); // Untuk Detail Pasien
-Route::get('/pasien/{id}/edit', [PasienController::class, 'edit']); // Untuk Form Edit Pasien

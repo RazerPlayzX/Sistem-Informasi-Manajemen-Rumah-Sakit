@@ -4,52 +4,103 @@ namespace App\Http\Controllers;
 
 use App\Models\Obat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ObatController extends Controller
 {
-    // 1. Ambil semua data obat (READ)
-    public function index()
+    /**
+     * Menampilkan halaman utama obat / menyuplai data JSON untuk AJAX.
+     */
+    public function index(Request $request)
     {
         $obat = Obat::all();
-        return response()->json([
-            'status' => 'success',
-            'data' => $obat
-        ], 200);
+
+        // JIKA MEMINTA LEWAT AJAX (Proses load tabel data di latar belakang)
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'data' => $obat
+            ], 200);
+        }
+
+        // JIKA DIAKSES BIASA LEWAT BROWSER / KLIK NAVBAR (Render Tampilan)
+        // Disesuaikan dengan rute kelompokmu: view('obat')
+        return view('obat'); 
     }
 
-    // 2. Simpan data obat baru (CREATE)
+    /**
+     * Menyimpan data obat baru via AJAX.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_obat' => 'required|string|max:255',
-            'jenis_obat' => 'required|string|max:255',
-            'harga' => 'required|numeric',
-            'stok' => 'required|numeric'
-        ]);
-
-        $obat = Obat::create($request->all());
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data obat berhasil ditambahkan!',
-            'data' => $obat
-        ], 201);
-    }
-    public function update(Request $request, $id)
-    {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_obat' => 'required|string|max:255',
             'jenis_obat' => 'required|string|max:255',
             'harga' => 'required|numeric|min:1',
             'stok' => 'required|numeric|min:0'
         ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $obat = Obat::create($request->all());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data komoditas obat berhasil ditambahkan ke gudang farmasi!',
+            'data' => $obat
+        ], 201);
+    }
+
+    /**
+     * Mengambil detail satu data obat untuk modal edit melayang.
+     */
+    public function show($id)
+    {
         $obat = Obat::find($id);
 
         if (!$obat) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Data obat tidak ditemukan!'
+                'message' => 'Data komponen obat tidak ditemukan!'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $obat
+        ], 200);
+    }
+
+    /**
+     * Memperbarui data obat via AJAX.
+     */
+    public function update(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'nama_obat' => 'required|string|max:255',
+            'jenis_obat' => 'required|string|max:255',
+            'harga' => 'required|numeric|min:1',
+            'stok' => 'required|numeric|min:0'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $obat = Obat::find($id);
+
+        if (!$obat) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data spesifikasi obat tidak ditemukan!'
             ], 404);
         }
 
@@ -57,19 +108,22 @@ class ObatController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Data obat berhasil diperbarui!',
+            'message' => 'Stok dan rincian data obat berhasil diperbarui!',
             'data' => $obat
         ], 200);
     }
-    // 3. Hapus data obat berdasarkan ID (DELETE)
-    public function destroy(Request $request, $id)
+
+    /**
+     * Menghapus data obat berdasarkan ID via AJAX.
+     */
+    public function destroy($id)
     {
         $obat = Obat::find($id);
 
         if (!$obat) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Data obat tidak ditemukan!'
+                'message' => 'Data batch obat tidak ditemukan!'
             ], 404);
         }
 
@@ -77,7 +131,7 @@ class ObatController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Data obat berhasil dihapus.'
+            'message' => 'Data komoditas obat berhasil dihapus dari sistem apotek.'
         ], 200);
-        }
     }
+}
