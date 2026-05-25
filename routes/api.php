@@ -5,7 +5,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DokterController;
 use App\Http\Controllers\Api\RuanganController;
-use App\Http\Controllers\Api\ObatController;
 use App\Http\Controllers\Api\TransaksiController;
 
 Route::get('/user', function (Request $request) {
